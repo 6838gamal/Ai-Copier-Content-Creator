@@ -3,6 +3,6 @@ uvicorn
 requests
 faiss-cpu
 numpy
-sentence-transformers
+#sentence-transformers
 python-dotenv
 

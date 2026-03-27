@@ -3,8 +3,8 @@ import numpy as np
 import pickle
 import os
 
-INDEX_FILE = "faiss.index"
-TEXTS_FILE = "texts.pkl"
+INDEX_FILE = "/tmp/faiss.index"
+TEXTS_FILE = "/tmp/texts.pkl"
 
 dimension = 384
 index = faiss.IndexFlatL2(dimension)
