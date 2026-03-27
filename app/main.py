@@ -1,11 +1,19 @@
 import os
+import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
 from app.routes.generate import router as generate_router
 from app.routes.status import router as status_router
 from app.routes.ingest_api import router as ingest_router
 from app.db.vector_store import load as load_faiss
 from app.db.database import init_db
+
+# ---------------------------
+# Logging
+# ---------------------------
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # ---------------------------
 # إعداد FastAPI
@@ -16,34 +24,30 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# السماح بالوصول من أي مكان (CORS)
+# ---------------------------
+# CORS
+# ---------------------------
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"],  # عدّلها لاحقًا
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 # ---------------------------
-# تحميل قاعدة FAISS و DB
+# Startup Event
 # ---------------------------
-init_db()       # إنشاء الجداول لو لم تكن موجودة
-load_faiss()    # تحميل FAISS index والنصوص المخزنة
+@app.on_event("startup")
+def startup_event():
+    logger.info("🚀 Starting app...")
+    init_db()
+    load_faiss()
+    logger.info("✅ DB & FAISS Loaded")
 
 # ---------------------------
-# تسجيل الروترات
+# Routers
 # ---------------------------
 app.include_router(generate_router, prefix="/api")
 app.include_router(status_router, prefix="/api")
 app.include_router(ingest_router, prefix="/api")
-
-# ---------------------------
-# Main Run (للـ Render)
-# ---------------------------
-if __name__ == "__main__":
-    import uvicorn
-
-    # Render يمرر المنفذ عبر متغير PORT
-    port = int(os.environ.get("PORT", 8000))
-    uvicorn.run("app.main:app", port=port, reload=False)
