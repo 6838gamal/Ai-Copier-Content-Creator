@@ -59,8 +59,8 @@ app = FastAPI(
 # ---------------------------
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-static_path = os.path.join(BASE_DIR, "static")
-templates_path = os.path.join(BASE_DIR, "templates")
+static_path = os.path.join(os.path.dirname(BASE_DIR), "static")
+templates_path = os.path.join(os.path.dirname(BASE_DIR), "templates")
 
 if os.path.isdir(static_path):
     app.mount("/static", StaticFiles(directory=static_path), name="static")
