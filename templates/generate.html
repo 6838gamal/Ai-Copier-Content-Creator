@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}توليد المحتوى{% endblock %}
+
+{% block content %}
+<section class="generator">
+
+    <h2>✨ توليد محتوى</h2>
+
+    <textarea id="prompt" placeholder="اكتب طلبك هنا..."></textarea>
+
+    <button onclick="generateContent()">توليد</button>
+
+    <div id="result"></div>
+
+</section>
+{% endblock %}
