@@ -4,4 +4,4 @@ router = APIRouter()
 
 @router.get("/status")
 def status():
-    return {"status": "ok", "service": "Gemini AI"}
+    return {"status": "ok"}

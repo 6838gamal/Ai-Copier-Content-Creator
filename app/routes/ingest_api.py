@@ -1,9 +1,18 @@
 from fastapi import APIRouter
-from app.scripts.ingest import ingest_content
+from app.services.embedding import get_embedding
+from app.db.vector_store import add_vector, save
 
 router = APIRouter()
 
 @router.post("/ingest")
 def ingest(data: dict):
-    ingest_content(data.get("texts", []))
-    return {"status": "ingested"}
+    texts = data.get("texts", [])
+
+    for text in texts:
+        vector = get_embedding(text)
+        add_vector(vector, text)
+
+    save()
+
+    return {"status": "ingested", "count": len(texts)}
+
