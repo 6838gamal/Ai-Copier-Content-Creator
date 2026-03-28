@@ -3,10 +3,28 @@
 {% block title %}الرئيسية{% endblock %}
 
 {% block content %}
-<section class="hero">
-    <h1>حوّل أفكارك إلى محتوى خلال ثواني</h1>
-    <p>مدعوم بالذكاء الاصطناعي + قاعدة معرفة ذكية</p>
+<section class="home">
+    <h1>مرحباً بك في 🚀 Gamal AI</h1>
+    <p>النظام الذكي لتوليد المحتوى والتدرب على مصادرك الخاصة.</p>
 
-    <a href="/generate" class="btn">ابدأ الآن</a>
+    <div class="cards">
+        <div class="card">
+            <h3>✨ توليد المحتوى</h3>
+            <p>اكتب طلبك ودع الذكاء الاصطناعي يقوم بالتوليد لك.</p>
+            <a href="/generate" class="btn">اذهب للتوليد</a>
+        </div>
+
+        <div class="card">
+            <h3>📊 حالة النظام</h3>
+            <p>تحقق من حالة النظام واطلع على الإحصائيات.</p>
+            <a href="/status" class="btn">تحقق من الحالة</a>
+        </div>
+
+        <div class="card">
+            <h3>📁 إضافة مصدر</h3>
+            <p>أضف ملفات ومصادر لتدريب النظام وتحسين المحتوى.</p>
+            <a href="/ingest" class="btn">أضف مصدر</a>
+        </div>
+    </div>
 </section>
 {% endblock %}

@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block title %}إضافة مصدر{% endblock %}
+
+{% block content %}
+<section class="ingest">
+    <h2>📁 إضافة مصدر للنظام</h2>
+    <input type="file" id="fileInput">
+    <button onclick="uploadFile()">رفع المصدر</button>
+    <div id="ingestResult"></div>
+</section>
+{% endblock %}
