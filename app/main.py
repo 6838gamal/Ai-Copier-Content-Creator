@@ -54,17 +54,21 @@ app = FastAPI(
 )
 
 # ---------------------------
-# Paths (🔥 الآن بسيط ونظيف)
+# Paths (🔥 بسيط ونظيف)
 # ---------------------------
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
-
-app.mount(
-    "/static",
-    StaticFiles(directory=os.path.join(BASE_DIR, "static")),
-    name="static"
+templates = Jinja2Templates(
+    directory=os.path.join(BASE_DIR, "templates")
 )
+
+static_path = os.path.join(BASE_DIR, "static")
+
+if os.path.isdir(static_path):
+    app.mount("/static", StaticFiles(directory=static_path), name="static")
+    logger.info("✅ Static files loaded")
+else:
+    logger.warning("⚠️ Static folder not found")
 
 # ---------------------------
 # CORS
@@ -78,12 +82,12 @@ app.add_middleware(
 )
 
 # ---------------------------
-# Routes (HTML)
+# Routes (HTML Pages)
 # ---------------------------
 @app.get("/", response_class=HTMLResponse)
 def home(request: Request):
     return templates.TemplateResponse(
-        "index.html",
+        name="index.html",
         context={"request": request}
     )
 
@@ -91,7 +95,7 @@ def home(request: Request):
 @app.get("/generate", response_class=HTMLResponse)
 def generate_page(request: Request):
     return templates.TemplateResponse(
-        "generate.html",
+        name="generate.html",
         context={"request": request}
     )
 
@@ -99,23 +103,27 @@ def generate_page(request: Request):
 @app.get("/status-page", response_class=HTMLResponse)
 def status_page(request: Request):
     return templates.TemplateResponse(
-        "status.html",
+        name="status.html",
         context={"request": request}
     )
 
 # ---------------------------
-# API Routes
+# API Routers
 # ---------------------------
-app.include_router(generate_router, prefix="/api")
-app.include_router(status_router, prefix="/api")
-app.include_router(ingest_router, prefix="/api")
+app.include_router(generate_router, prefix="/api", tags=["AI Generate"])
+app.include_router(status_router, prefix="/api", tags=["System Status"])
+app.include_router(ingest_router, prefix="/api", tags=["Data Ingestion"])
 
 # ---------------------------
 # Health Check
 # ---------------------------
 @app.get("/health")
 def health():
-    return {"status": "ok"}
+    return {
+        "status": "ok",
+        "service": "Gamal AI",
+        "version": "1.0.0"
+    }
 
 # ---------------------------
 # Global Error Handler
@@ -125,5 +133,8 @@ async def global_exception_handler(request: Request, exc: Exception):
     logger.error(f"❌ Error: {exc}")
     return JSONResponse(
         status_code=500,
-        content={"error": str(exc)}
+        content={
+            "error": "Internal Server Error",
+            "message": str(exc)
+        }
     )
