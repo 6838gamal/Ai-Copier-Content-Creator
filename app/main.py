@@ -54,16 +54,13 @@ app = FastAPI(
 )
 
 # ---------------------------
-# Paths (داخل app)
+# Paths
 # ---------------------------
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-templates = Jinja2Templates(
-    directory=os.path.join(BASE_DIR, "templates")
-)
+templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
 
 static_path = os.path.join(BASE_DIR, "static")
-
 if os.path.isdir(static_path):
     app.mount("/static", StaticFiles(directory=static_path), name="static")
     logger.info("✅ Static files loaded")
@@ -87,9 +84,8 @@ app.add_middleware(
 @app.get("/", response_class=HTMLResponse)
 def home(request: Request):
     return templates.TemplateResponse(
-        "index.html",
-        request,
-        {"request": request}
+        "index.html",  # اسم القالب
+        {"request": request}  # المتغيرات
     )
 
 
@@ -97,7 +93,6 @@ def home(request: Request):
 def generate_page(request: Request):
     return templates.TemplateResponse(
         "generate.html",
-        request,
         {"request": request}
     )
 
@@ -106,7 +101,6 @@ def generate_page(request: Request):
 def status_page(request: Request):
     return templates.TemplateResponse(
         "status.html",
-        request,
         {"request": request}
     )
 
