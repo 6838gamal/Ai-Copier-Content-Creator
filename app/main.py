@@ -54,18 +54,26 @@ app = FastAPI(
 )
 
 # ---------------------------
-# Paths
+# Paths & Templates / Static
 # ---------------------------
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # app/
+TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")
+STATIC_DIR = os.path.join(BASE_DIR, "static")
 
-templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
-
-static_path = os.path.join(BASE_DIR, "static")
-if os.path.isdir(static_path):
-    app.mount("/static", StaticFiles(directory=static_path), name="static")
-    logger.info("✅ Static files loaded")
+# Templates
+if os.path.isdir(TEMPLATES_DIR):
+    templates = Jinja2Templates(directory=TEMPLATES_DIR)
+    logger.info(f"✅ Templates loaded from {TEMPLATES_DIR}")
 else:
-    logger.warning("⚠️ Static folder not found")
+    templates = None
+    logger.warning(f"⚠️ Templates folder not found at {TEMPLATES_DIR}")
+
+# Static
+if os.path.isdir(STATIC_DIR):
+    app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+    logger.info(f"✅ Static files mounted at {STATIC_DIR}")
+else:
+    logger.warning(f"⚠️ Static folder not found at {STATIC_DIR}")
 
 # ---------------------------
 # CORS
@@ -83,22 +91,26 @@ app.add_middleware(
 # ---------------------------
 @app.get("/", response_class=HTMLResponse)
 def home(request: Request):
+    if not templates:
+        return HTMLResponse("<h1>Templates folder not found!</h1>", status_code=500)
     return templates.TemplateResponse(
-        "index.html",  # اسم القالب
-        {"request": request}  # المتغيرات
+        "index.html",
+        {"request": request}
     )
-
 
 @app.get("/generate", response_class=HTMLResponse)
 def generate_page(request: Request):
+    if not templates:
+        return HTMLResponse("<h1>Templates folder not found!</h1>", status_code=500)
     return templates.TemplateResponse(
         "generate.html",
         {"request": request}
     )
 
-
 @app.get("/status-page", response_class=HTMLResponse)
 def status_page(request: Request):
+    if not templates:
+        return HTMLResponse("<h1>Templates folder not found!</h1>", status_code=500)
     return templates.TemplateResponse(
         "status.html",
         {"request": request}
