@@ -3,10 +3,7 @@ version: "3.9"
 services:
   web:
     build: .
-    container_name: fastapi_app
     ports:
       - "8000:8000"
     volumes:
-      - .:/app  # يسمح بتحديث الكود مباشرة بدون إعادة بناء الحاوية
-    environment:
-      - PYTHONUNBUFFERED=1
+      - .:/app

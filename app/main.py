@@ -49,111 +49,81 @@ async def lifespan(app: FastAPI):
 # ---------------------------
 app = FastAPI(
     title="Gamal Gemini AI",
-    description="AI Content Generator + RAG System",
     version="1.0.0",
     lifespan=lifespan
 )
 
 # ---------------------------
-# Paths Fix (🔥 المهم)
+# Paths (🔥 الآن بسيط ونظيف)
 # ---------------------------
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-ROOT_DIR = os.path.dirname(BASE_DIR)
 
-templates_path = os.path.join(ROOT_DIR, "templates")
-static_path = os.path.join(ROOT_DIR, "static")
+templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
 
-# 🔍 Debug مهم (سيظهر في logs)
-logger.info(f"📁 Templates path: {templates_path}")
-logger.info(f"📁 Static path: {static_path}")
-logger.info(f"📁 Templates exists: {os.path.exists(templates_path)}")
-logger.info(f"📁 Static exists: {os.path.exists(static_path)}")
-
-if os.path.exists(templates_path):
-    logger.info(f"📄 Templates files: {os.listdir(templates_path)}")
-else:
-    logger.error("❌ Templates folder NOT FOUND")
-
-# ---------------------------
-# Static Files
-# ---------------------------
-if os.path.isdir(static_path):
-    app.mount("/static", StaticFiles(directory=static_path), name="static")
-    logger.info("✅ Static files loaded")
-else:
-    logger.warning("⚠️ Static folder not found")
-
-# ---------------------------
-# Templates
-# ---------------------------
-templates = Jinja2Templates(directory=templates_path)
+app.mount(
+    "/static",
+    StaticFiles(directory=os.path.join(BASE_DIR, "static")),
+    name="static"
+)
 
 # ---------------------------
 # CORS
 # ---------------------------
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # عدلها لاحقًا للإنتاج
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 # ---------------------------
-# Routes (HTML Pages)
+# Routes (HTML)
 # ---------------------------
 @app.get("/", response_class=HTMLResponse)
 def home(request: Request):
-    try:
-        return templates.TemplateResponse("index.html", {"request": request})
-    except Exception as e:
-        logger.error(f"❌ Template error: {e}")
-        return JSONResponse(
-            status_code=500,
-            content={"error": "Template error", "details": str(e)}
-        )
+    return templates.TemplateResponse(
+        "index.html",
+        context={"request": request}
+    )
 
 
 @app.get("/generate", response_class=HTMLResponse)
 def generate_page(request: Request):
-    return templates.TemplateResponse("generate.html", {"request": request})
+    return templates.TemplateResponse(
+        "generate.html",
+        context={"request": request}
+    )
 
 
 @app.get("/status-page", response_class=HTMLResponse)
 def status_page(request: Request):
-    return templates.TemplateResponse("status.html", {"request": request})
-
-
-# ---------------------------
-# API Routers
-# ---------------------------
-app.include_router(generate_router, prefix="/api", tags=["AI Generate"])
-app.include_router(status_router, prefix="/api", tags=["System Status"])
-app.include_router(ingest_router, prefix="/api", tags=["Data Ingestion"])
-
+    return templates.TemplateResponse(
+        "status.html",
+        context={"request": request}
+    )
 
 # ---------------------------
-# Health Check (مهم لـ Render)
+# API Routes
+# ---------------------------
+app.include_router(generate_router, prefix="/api")
+app.include_router(status_router, prefix="/api")
+app.include_router(ingest_router, prefix="/api")
+
+# ---------------------------
+# Health Check
 # ---------------------------
 @app.get("/health")
-def health_check():
-    return {
-        "status": "ok",
-        "service": "Gamal AI",
-        "version": "1.0.0"
-    }
-
+def health():
+    return {"status": "ok"}
 
 # ---------------------------
 # Global Error Handler
 # ---------------------------
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
-    logger.error(f"❌ Unhandled error: {exc}")
+    logger.error(f"❌ Error: {exc}")
     return JSONResponse(
         status_code=500,
-        content={
-            "error": "Internal Server Error",
-            "message": str(exc)
-        }
+        content={"error": str(exc)}
     )
