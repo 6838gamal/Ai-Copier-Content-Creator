@@ -109,13 +109,23 @@ def generate_page(request: Request):
         context={}
     )
 
-@app.get("/status-page", response_class=HTMLResponse)
+@app.get("/status", response_class=HTMLResponse)
 def status_page(request: Request):
     if not templates:
         return HTMLResponse("<h1>Templates folder not found!</h1>", status_code=500)
     return templates.TemplateResponse(
         request=request,
         name="status.html",
+        context={}
+    )
+
+@app.get("/ingest", response_class=HTMLResponse)
+def status_page(request: Request):
+    if not templates:
+        return HTMLResponse("<h1>Templates folder>
+    return templates.TemplateResponse(
+        request=request,
+        name="ingest.html",
         context={}
     )
 
