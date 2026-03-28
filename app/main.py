@@ -94,8 +94,9 @@ def home(request: Request):
     if not templates:
         return HTMLResponse("<h1>Templates folder not found!</h1>", status_code=500)
     return templates.TemplateResponse(
-        "index.html",
-        {"request": request}
+request=request,
+        name="index.html",
+        context={}
     )
 
 @app.get("/generate", response_class=HTMLResponse)
@@ -103,8 +104,9 @@ def generate_page(request: Request):
     if not templates:
         return HTMLResponse("<h1>Templates folder not found!</h1>", status_code=500)
     return templates.TemplateResponse(
-        "generate.html",
-        {"request": request}
+        request=request,
+        name="generate.html",
+        context={}
     )
 
 @app.get("/status-page", response_class=HTMLResponse)
@@ -112,8 +114,9 @@ def status_page(request: Request):
     if not templates:
         return HTMLResponse("<h1>Templates folder not found!</h1>", status_code=500)
     return templates.TemplateResponse(
-        "status.html",
-        {"request": request}
+        request=request,
+        name="status.html",
+        context={}
     )
 
 # ---------------------------
