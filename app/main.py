@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
@@ -22,7 +22,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # ---------------------------
-# Lifespan (بديل startup)
+# Lifespan
 # ---------------------------
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -55,17 +55,37 @@ app = FastAPI(
 )
 
 # ---------------------------
-# Static & Templates
+# Paths Fix (🔥 المهم)
 # ---------------------------
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+ROOT_DIR = os.path.dirname(BASE_DIR)
 
-static_path = os.path.join(os.path.dirname(BASE_DIR), "static")
-templates_path = os.path.join(os.path.dirname(BASE_DIR), "templates")
+templates_path = os.path.join(ROOT_DIR, "templates")
+static_path = os.path.join(ROOT_DIR, "static")
 
+# 🔍 Debug مهم (سيظهر في logs)
+logger.info(f"📁 Templates path: {templates_path}")
+logger.info(f"📁 Static path: {static_path}")
+logger.info(f"📁 Templates exists: {os.path.exists(templates_path)}")
+logger.info(f"📁 Static exists: {os.path.exists(static_path)}")
+
+if os.path.exists(templates_path):
+    logger.info(f"📄 Templates files: {os.listdir(templates_path)}")
+else:
+    logger.error("❌ Templates folder NOT FOUND")
+
+# ---------------------------
+# Static Files
+# ---------------------------
 if os.path.isdir(static_path):
     app.mount("/static", StaticFiles(directory=static_path), name="static")
     logger.info("✅ Static files loaded")
+else:
+    logger.warning("⚠️ Static folder not found")
 
+# ---------------------------
+# Templates
+# ---------------------------
 templates = Jinja2Templates(directory=templates_path)
 
 # ---------------------------
@@ -73,7 +93,7 @@ templates = Jinja2Templates(directory=templates_path)
 # ---------------------------
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # عدلها لاحقًا
+    allow_origins=["*"],  # عدلها لاحقًا للإنتاج
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -84,7 +104,14 @@ app.add_middleware(
 # ---------------------------
 @app.get("/", response_class=HTMLResponse)
 def home(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+    try:
+        return templates.TemplateResponse("index.html", {"request": request})
+    except Exception as e:
+        logger.error(f"❌ Template error: {e}")
+        return JSONResponse(
+            status_code=500,
+            content={"error": "Template error", "details": str(e)}
+        )
 
 
 @app.get("/generate", response_class=HTMLResponse)
@@ -118,12 +145,15 @@ def health_check():
 
 
 # ---------------------------
-# Global Error Handler (اختياري)
+# Global Error Handler
 # ---------------------------
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
     logger.error(f"❌ Unhandled error: {exc}")
-    return {
-        "error": "Internal Server Error",
-        "message": str(exc)
-    }
+    return JSONResponse(
+        status_code=500,
+        content={
+            "error": "Internal Server Error",
+            "message": str(exc)
+        }
+    )
