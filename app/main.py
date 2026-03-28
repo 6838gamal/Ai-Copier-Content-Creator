@@ -54,7 +54,7 @@ app = FastAPI(
 )
 
 # ---------------------------
-# Paths (🔥 بسيط ونظيف)
+# Paths (داخل app)
 # ---------------------------
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -87,24 +87,27 @@ app.add_middleware(
 @app.get("/", response_class=HTMLResponse)
 def home(request: Request):
     return templates.TemplateResponse(
-        name="index.html",
-        context={"request": request}
+        "index.html",
+        request,
+        {"request": request}
     )
 
 
 @app.get("/generate", response_class=HTMLResponse)
 def generate_page(request: Request):
     return templates.TemplateResponse(
-        name="generate.html",
-        context={"request": request}
+        "generate.html",
+        request,
+        {"request": request}
     )
 
 
 @app.get("/status-page", response_class=HTMLResponse)
 def status_page(request: Request):
     return templates.TemplateResponse(
-        name="status.html",
-        context={"request": request}
+        "status.html",
+        request,
+        {"request": request}
     )
 
 # ---------------------------
